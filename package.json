@@ -1,7 +1,7 @@
 {
     "name": "toggleshowpassword",
     "widgetName": "ToggleShowPassword",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "Display a toggle to show/hide password input fields",
     "copyright": "Incentro 2023",
     "author": "Rob Duits",
@@ -25,9 +25,9 @@
         "release": "pluggable-widgets-tools release:web"
     },
     "devDependencies": {
-        "@mendix/pluggable-widgets-tools": "^9.18.0"
+        "@mendix/pluggable-widgets-tools": "^10.15.0"
     },
     "dependencies": {
-        "classnames": "^2.2.6"
+        "classnames": "^2.5.1"
     }
 }
