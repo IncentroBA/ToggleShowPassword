@@ -1,4 +1,3 @@
-import { createElement } from "react";
 import defaultEyeOpenIcon from "./assets/eye.svg";
 
 export function preview({ eyeOpen }) {

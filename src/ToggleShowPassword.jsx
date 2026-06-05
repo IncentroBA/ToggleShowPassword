@@ -4,21 +4,39 @@ import defaultEyeOpenIcon from "./assets/eye.svg";
 
 export default function ToggleShowPassword({ eyeOpen, eyeClosed }) {
     const item = `input[type="password"]`;
+    const visibilityObservers = new WeakMap();
+
+    function observeInputType(input, button) {
+        if (visibilityObservers.has(input)) {
+            return;
+        }
+
+        const observer = new MutationObserver(() => {
+            if (button.dataset.visible === "true" && input.type === "password") {
+                input.type = "text";
+            }
+        });
+
+        observer.observe(input, { attributes: true, attributeFilter: ["type"] });
+        visibilityObservers.set(input, observer);
+    }
 
     function handlePasswordToggle(event) {
-        // eslint-disable-next-line consistent-this
-        const button = event.target.parentElement;
-        const input = button.previousSibling;
-        const inputType = input.getAttribute("type");
+        const button = event.currentTarget || event.target.parentElement;
+        const input = button.previousElementSibling;
+        if (!input) {
+            return;
+        }
 
-        if (inputType === "password") {
-            input.setAttribute("type", "text");
-            button.classList.remove("show-val");
-            button.classList.add("hide-val");
-        } else {
-            input.setAttribute("type", "password");
-            button.classList.add("show-val");
-            button.classList.remove("hide-val");
+        const isHidden = input.type === "password";
+        input.type = isHidden ? "text" : "password";
+        button.dataset.visible = String(isHidden);
+        button.classList.toggle("show-val", !isHidden);
+        button.classList.toggle("hide-val", isHidden);
+
+        if (isHidden) {
+            input.focus();
+            observeInputType(input, button);
         }
     }
 
@@ -53,13 +71,24 @@ export default function ToggleShowPassword({ eyeOpen, eyeClosed }) {
             parent.insertAdjacentHTML(
                 "beforeend",
                 `<button id="toggle-password-button-${index}" type="button" class="toggle-password-button show-val" tabindex="-1">
-                        <img src=${eyeOpen ? eyeOpen.value.uri : defaultEyeOpenIcon} class="icon-hide" />
-                        <img src=${eyeClosed ? eyeClosed.value.uri : defaultEyeClosedIcon} class="icon-show" />
-                    </button>`
+                    <img src=${eyeOpen ? eyeOpen.value.uri : defaultEyeOpenIcon} class="icon-hide" />
+                    <img src=${eyeClosed ? eyeClosed.value.uri : defaultEyeClosedIcon} class="icon-show" />
+                </button>`
             );
 
             const toggleBtn = document.getElementById(`toggle-password-button-${index}`);
+            toggleBtn.dataset.visible = "false";
             toggleBtn.addEventListener("click", handlePasswordToggle);
+
+            const inputEl = toggleBtn.previousElementSibling;
+            if (inputEl) {
+                inputEl.addEventListener("focus", () => {
+                    if (toggleBtn.dataset.visible === "true") {
+                        setTimeout(() => inputEl.type = "text", 0);
+                    }
+                });
+                observeInputType(inputEl, toggleBtn);
+            }
         }
     }
 
